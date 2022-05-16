@@ -12,10 +12,12 @@ import (
 )
 
 func main() {
-	logger := log.New(os.Stdout, "healtheCheck ", log.LstdFlags)
+	logger := log.New(os.Stdout, "server log ", log.LstdFlags)
 	healthCheckHandler := handlers.NewHealthCheck(logger)
+	productsHandler := handlers.NewProducts(logger)
 	sm := http.NewServeMux()
 	sm.Handle("/ping", healthCheckHandler)
+	sm.Handle("/products", productsHandler)
 
 	server := &http.Server{
 		Addr:         ":3000",
@@ -36,7 +38,7 @@ func main() {
 	notifyChannel := make(chan os.Signal, 1)
 	signal.Notify(notifyChannel, os.Interrupt, syscall.SIGTERM)
 
-	// block untill signal is recived
+	// block untill signal is recieved
 	signal := <-notifyChannel
 	logger.Println("Gracefully Shutting down...", signal)
 
