@@ -17,7 +17,7 @@ func main() {
 	productsHandler := handlers.NewProducts(logger)
 	sm := http.NewServeMux()
 	sm.Handle("/ping", healthCheckHandler)
-	sm.Handle("/products", productsHandler)
+	sm.Handle("/products/", productsHandler)
 
 	server := &http.Server{
 		Addr:         ":3000",
