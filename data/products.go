@@ -39,23 +39,23 @@ func AppnedPorduct(p *Product) {
 	productsList = append(productsList, p)
 }
 
-func UpdateProduct(newPorcut *Product) bool {
-	pi := getProductIndexById(newPorcut.ID)
+func UpdateProduct(updatedProductData *Product, id int) bool {
+	pi := GetProductIndexById(id)
 	if pi == -1 {
 		return false
 	}
 	p := productsList[pi]
-	if newPorcut.Name != "" {
-		p.Name = newPorcut.Name
+	if updatedProductData.Name != "" {
+		p.Name = updatedProductData.Name
 	}
-	if newPorcut.Description != "" {
-		p.Description = newPorcut.Description
+	if updatedProductData.Description != "" {
+		p.Description = updatedProductData.Description
 	}
-	if newPorcut.SKU != "" {
-		p.SKU = newPorcut.SKU
+	if updatedProductData.SKU != "" {
+		p.SKU = updatedProductData.SKU
 	}
-	if newPorcut.Price > 0 {
-		p.Price = newPorcut.Price
+	if updatedProductData.Price > 0 {
+		p.Price = updatedProductData.Price
 	}
 	p.UpdatedOn = time.Now().UTC().String()
 	return true
@@ -66,7 +66,7 @@ func GetNextProductId() int {
 	return lastProduct.ID + 1
 }
 
-func getProductIndexById(id int) int {
+func GetProductIndexById(id int) int {
 	for index, product := range productsList {
 		if product.ID == id {
 			return index

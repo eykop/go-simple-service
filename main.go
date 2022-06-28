@@ -9,19 +9,24 @@ import (
 	"simplems/handlers"
 	"syscall"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
 	logger := log.New(os.Stdout, "server log ", log.LstdFlags)
 	healthCheckHandler := handlers.NewHealthCheck(logger)
 	productsHandler := handlers.NewProducts(logger)
-	sm := http.NewServeMux()
-	sm.Handle("/ping", healthCheckHandler)
-	sm.Handle("/products/", productsHandler)
+	router := mux.NewRouter()
+	psr := router.PathPrefix("/products").Subrouter()
+	psr.HandleFunc("/", productsHandler.ListProducts).Methods(http.MethodGet)
+	psr.HandleFunc("/", productsHandler.CreateProduct).Methods(http.MethodPost)
+	psr.HandleFunc("/{id:[0-9]+}/", productsHandler.UpdateProduct).Methods(http.MethodPut)
+	router.Handle("/ping", healthCheckHandler)
 
 	server := &http.Server{
 		Addr:         ":3000",
-		Handler:      sm,
+		Handler:      router,
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
