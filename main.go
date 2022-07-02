@@ -11,10 +11,22 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"go.uber.org/zap"
 )
 
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Do stuff here
+
+		log.Println(r.RequestURI)
+		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
-	logger := log.New(os.Stdout, "server log ", log.LstdFlags)
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
 	healthCheckHandler := handlers.NewHealthCheck(logger)
 	productsHandler := handlers.NewProducts(logger)
 	router := mux.NewRouter()
@@ -36,7 +48,7 @@ func main() {
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
-			logger.Fatal(err)
+			logger.Fatal("Fatal error occured", zap.Error(err))
 		}
 	}()
 
@@ -45,7 +57,7 @@ func main() {
 
 	// block untill signal is recieved
 	signal := <-notifyChannel
-	logger.Println("Gracefully Shutting down...", signal)
+	logger.Info("Gracefully Shutting down...", zap.String("reason", signal.String()))
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
