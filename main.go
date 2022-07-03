@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -30,10 +31,18 @@ func decodeProductMiddleware(l *zap.Logger) func(http.Handler) http.Handler {
 				l.Debug("Request", zap.String("url", r.RequestURI), zap.String("method", r.Method), zap.Bool("decoding", true))
 				prod := handlers.JsonToProduct(r, l)
 				if prod == nil {
-					l.Error("Failed to update produc, could not decode product from json.")
+					l.Error("Failed to read produc, could not decode product from json.")
 					http.Error(w, "Failed to deserialize product from json.", http.StatusBadRequest)
 					return
 				}
+
+				validationErr := prod.Validate()
+				if validationErr != nil {
+					l.Error("Failed to validate produc.", zap.Error(validationErr))
+					http.Error(w, fmt.Sprintf("Failed to validate product %s.", validationErr), http.StatusBadRequest)
+					return
+				}
+
 				l.Debug("decoded product info", zap.String("name", prod.Name))
 				// add the product to the context
 				ctx := context.WithValue(r.Context(), handlers.ProductKey{}, prod)
