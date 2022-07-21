@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"simplems/data"
 	"strconv"
@@ -46,6 +47,26 @@ func JsonToProduct(r *http.Request, l *zap.Logger) *data.Product {
 		return nil
 	}
 	return p
+}
+
+func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	productId, err := strconv.Atoi(id)
+	if err != nil {
+		p.l.Error("Failed to delete product", zap.Error(err))
+		http.Error(rw, "Bad request, could not get product id", http.StatusBadRequest)
+		return
+	}
+	p.l.Info("Delete Procut", zap.Int("id", productId))
+	delErr := data.DeleteProductByID(productId)
+	if delErr != nil {
+		p.l.Error("Failed to delete product", zap.Error(delErr))
+		http.Error(rw, fmt.Sprintf("Bad request, could not delete product %v", delErr), http.StatusBadRequest)
+		return
+	}
+
 }
 
 func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {

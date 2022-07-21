@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"regexp"
 	"time"
@@ -88,8 +89,21 @@ func GetProductIndexById(id int) int {
 	return -1
 }
 
+func DeleteProductByID(id int) error {
+	if id < 0 || id > len(productsList)-1 {
+		return fmt.Errorf("Product Id %d not found", id)
+	}
+	if id == len(productsList) {
+		productsList = productsList[:id]
+	} else {
+		productsList = append(productsList[:id], productsList[id+1:]...)
+	}
+	return nil
+
+}
+
 var productsList = []*Product{
-	&Product{
+	{
 		ID:          0,
 		Name:        "Espresso",
 		Description: "Lite coffe drink...",
@@ -98,7 +112,7 @@ var productsList = []*Product{
 		CreatedOn:   time.Now().UTC().String(),
 		UpdatedOn:   time.Now().UTC().String(),
 	},
-	&Product{
+	{
 		ID:          1,
 		Name:        "Latte",
 		Description: "Lite coffe drink with milk...",

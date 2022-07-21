@@ -7,7 +7,7 @@ A simple microservice with Golang, Mainly done while learning Golang
   - [x] Get
   - [x] Update
   - [x] Create
-  - Delete
+  - [x] Delete
 
 # TODO - Order is not pririty:
 

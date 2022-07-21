@@ -66,6 +66,7 @@ func main() {
 	psr.HandleFunc("/", productsHandler.ListProducts).Methods(http.MethodGet)
 	psr.HandleFunc("/", productsHandler.CreateProduct).Methods(http.MethodPost)
 	psr.HandleFunc("/{id:[0-9]+}/", productsHandler.UpdateProduct).Methods(http.MethodPut)
+	psr.HandleFunc("/{id:[0-9]+}/", productsHandler.DeleteProduct).Methods(http.MethodDelete)
 	router.Handle("/ping", healthCheckHandler)
 
 	server := &http.Server{
