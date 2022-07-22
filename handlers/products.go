@@ -49,6 +49,34 @@ func JsonToProduct(r *http.Request, l *zap.Logger) *data.Product {
 	return p
 }
 
+func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	productId, err := strconv.Atoi(id)
+	if err != nil {
+		p.l.Error("Failed to get product", zap.Error(err))
+		http.Error(rw, "Bad request, could not get product id", http.StatusBadRequest)
+		return
+	}
+	p.l.Info("Get Procut", zap.Int("id", productId))
+	pi := data.GetProductIndexById(productId)
+	if pi == -1 {
+		p.l.Error("Failed to update produc, invalid product id.", zap.Int("id", productId))
+		http.Error(rw, "Failed to update new product invlaid product id", http.StatusBadRequest)
+		return
+	}
+
+	pl := data.GetProductsList()
+	prod := pl[pi]
+	prodErr := prod.ToJson(rw)
+	if prodErr != nil {
+		p.l.Error("Failed to get product", zap.Error(err))
+		http.Error(rw, "Failed to get product", http.StatusInternalServerError)
+	}
+	p.l.Info("Get Product Response", zap.String("remoteAddr", r.RemoteAddr), zap.String("method", r.Method), zap.String("url", r.URL.Path), zap.Int("status", http.StatusOK))
+}
+
 func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]

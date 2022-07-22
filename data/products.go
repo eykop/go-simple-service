@@ -29,6 +29,11 @@ func (p *Products) ToJson(w io.Writer) error {
 	return e.Encode(p)
 }
 
+func (p *Product) ToJson(w io.Writer) error {
+	e := json.NewEncoder(w)
+	return e.Encode(p)
+}
+
 func (p *Product) FromJson(r io.Reader) error {
 	return json.NewDecoder(r).Decode(p)
 }
