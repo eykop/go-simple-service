@@ -18,6 +18,21 @@ func NewProducts(l *zap.Logger) *Products {
 	return &Products{l}
 }
 
+// HTTPError example
+type HTTPError struct {
+	Code    int    `json:"code" example:"400"`
+	Message string `json:"message" example:"status bad request"`
+}
+
+// ListProducts godoc
+// @Summary     list products
+// @Description get all producs currently available
+// @Tags        products
+// @Accept       json
+// @Produce     json
+// @Success     200 {array} data.Product "ok"
+// @Failure      500  {object}  HTTPError
+// @Router      /products/ [get]
 func (p *Products) ListProducts(rw http.ResponseWriter, r *http.Request) {
 
 	pl := data.GetProductsList()
@@ -31,11 +46,24 @@ func (p *Products) ListProducts(rw http.ResponseWriter, r *http.Request) {
 
 type ProductKey struct{}
 
+// AddProduct godoc
+// @Summary      Add a product
+// @Description  add by json product
+// @Tags         products
+// @Accept       json
+// @Produce      json
+// @Param        product  body      data.Product  true  "Add product"
+// @Success      200      {object}  data.Product
+// @Failure      400      {object}  HTTPError
+// @Failure      404      {object}  HTTPError
+// @Failure      500      {object}  HTTPError
+// @Router       /products [post]
 func (p *Products) CreateProduct(rw http.ResponseWriter, r *http.Request) {
 
 	p.l.Info("Will create a new product")
 	prod := r.Context().Value(ProductKey{}).(*data.Product)
 	data.AppnedPorduct(prod)
+	prod.ToJson(rw)
 	p.l.Info("Create Product Response: ", zap.String("remoteAddr", r.RemoteAddr), zap.String("method", r.Method), zap.String("url", r.URL.Path), zap.Int("status", http.StatusOK))
 }
 
@@ -49,6 +77,18 @@ func JsonToProduct(r *http.Request, l *zap.Logger) *data.Product {
 	return p
 }
 
+// GetProduct godoc
+// @Summary      Gets a product
+// @Description  get product by ID
+// @Tags         products
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Product ID"
+// @Success      200  {object}  data.Product{name=string}
+// @Failure      400  {object}  HTTPError
+// @Failure      404  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
+// @Router       /products/{id} [get]
 func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -77,6 +117,18 @@ func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 	p.l.Info("Get Product Response", zap.String("remoteAddr", r.RemoteAddr), zap.String("method", r.Method), zap.String("url", r.URL.Path), zap.Int("status", http.StatusOK))
 }
 
+// DeleteProduct godoc
+// @Summary      Delete a product
+// @Description  Delete by product ID
+// @Tags         products
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Product ID"  Format(int64)
+// @Success      204
+// @Failure      400  {object}  HTTPError
+// @Failure      404  {object}  HTTPError
+// @Failure      500  {object}  HTTPError
+// @Router       /products/{id} [delete]
 func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -97,6 +149,19 @@ func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
 
 }
 
+// UpdateProduct godoc
+// @Summary      Update a product
+// @Description  Update by json product
+// @Tags         products
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int                  true  "Product ID"
+// @Param        product  body      data.Product true  "Update product"
+// @Success      200      {object}  data.Product
+// @Failure      400      {object}  HTTPError
+// @Failure      404      {object}  HTTPError
+// @Failure      500      {object}  HTTPError
+// @Router       /products/{id} [patch]
 func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
