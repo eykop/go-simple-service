@@ -185,6 +185,11 @@ func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 
 	}
 	prod := r.Context().Value(ProductKey{}).(*data.Product)
-	data.UpdateProduct(prod, productId)
+	//we already validated the product id to be valie so we ignore the returned error here!
+	// TODO: maybe we don't need the bool return of the update product!
+	pp, _ := data.UpdateProduct(prod, productId)
+
+	rw.Header().Add("Content-Type", "application/json")
+	pp.ToJson(rw)
 	p.l.Info("Update Products Response: ", zap.String("remoteAddr", r.RemoteAddr), zap.String("method", r.Method), zap.String("url", r.URL.Path), zap.Int("status", http.StatusOK))
 }

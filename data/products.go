@@ -58,10 +58,10 @@ func AppnedPorduct(p *Product) {
 	productsList = append(productsList, p)
 }
 
-func UpdateProduct(updatedProductData *Product, id int) bool {
+func UpdateProduct(updatedProductData *Product, id int) (*Product, bool) {
 	pi := GetProductIndexById(id)
 	if pi == -1 {
-		return false
+		return nil, false
 	}
 	p := productsList[pi]
 	if updatedProductData.Name != "" {
@@ -77,7 +77,7 @@ func UpdateProduct(updatedProductData *Product, id int) bool {
 		p.Price = updatedProductData.Price
 	}
 	p.UpdatedOn = time.Now().UTC().String()
-	return true
+	return p, true
 }
 
 func GetNextProductId() int {
