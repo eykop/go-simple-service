@@ -36,6 +36,8 @@ type HTTPError struct {
 func (p *Products) ListProducts(rw http.ResponseWriter, r *http.Request) {
 
 	pl := data.GetProductsList()
+	rw.Header().Add("Content-Type", "application/json")
+	// rw.WriteHeader(http.StatusOK)
 	err := pl.ToJson(rw)
 	if err != nil {
 		p.l.Error("Failed to List product", zap.Error(err))
@@ -63,6 +65,7 @@ func (p *Products) CreateProduct(rw http.ResponseWriter, r *http.Request) {
 	p.l.Info("Will create a new product")
 	prod := r.Context().Value(ProductKey{}).(*data.Product)
 	data.AppnedPorduct(prod)
+	rw.Header().Add("Content-Type", "application/json")
 	prod.ToJson(rw)
 	p.l.Info("Create Product Response: ", zap.String("remoteAddr", r.RemoteAddr), zap.String("method", r.Method), zap.String("url", r.URL.Path), zap.Int("status", http.StatusOK))
 }
@@ -109,6 +112,7 @@ func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 
 	pl := data.GetProductsList()
 	prod := pl[pi]
+	rw.Header().Add("Content-Type", "application/json")
 	prodErr := prod.ToJson(rw)
 	if prodErr != nil {
 		p.l.Error("Failed to get product", zap.Error(err))
