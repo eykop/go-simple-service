@@ -1,13 +1,9 @@
 package data
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"regexp"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
 
@@ -24,37 +20,12 @@ type Product struct {
 
 type Products []*Product
 
-func (p *Products) ToJson(w io.Writer) error {
-	e := json.NewEncoder(w)
-	return e.Encode(p)
-}
-
-func (p *Product) ToJson(w io.Writer) error {
-	e := json.NewEncoder(w)
-	return e.Encode(p)
-}
-
-func (p *Product) FromJson(r io.Reader) error {
-	return json.NewDecoder(r).Decode(p)
-}
-
-func (p *Product) Validate() error {
-	validate := validator.New()
-	validate.RegisterValidation("sku", ValidateSKU)
-	return validate.Struct(p)
-}
-
-func ValidateSKU(fl validator.FieldLevel) bool {
-	re := regexp.MustCompile("[a-z]+-[a-z]+-[a-z]+")
-	return len(re.FindAllString(fl.Field().String(), -1)) == 1
-}
-
 func GetProductsList() Products {
 	return productsList
 }
 
 func AppnedPorduct(p *Product) {
-	p.ID = GetNextProductId()
+	p.ID = getNextProductId()
 	productsList = append(productsList, p)
 }
 
@@ -80,21 +51,7 @@ func UpdateProduct(updatedProductData *Product, id int) (*Product, bool) {
 	return p, true
 }
 
-func GetNextProductId() int {
-	lastProduct := productsList[len(productsList)-1]
-	return lastProduct.ID + 1
-}
-
-func GetProductIndexById(id int) int {
-	for index, product := range productsList {
-		if product.ID == id {
-			return index
-		}
-	}
-	return -1
-}
-
-func DeleteProductByID(id int) error {
+func DeleteProduct(id int) error {
 	if id < 0 || id > len(productsList)-1 {
 		return fmt.Errorf("Product Id %d not found", id)
 	}

@@ -38,7 +38,7 @@ func (p *Products) ListProducts(rw http.ResponseWriter, r *http.Request) {
 	pl := data.GetProductsList()
 	rw.Header().Add("Content-Type", "application/json")
 	// rw.WriteHeader(http.StatusOK)
-	err := pl.ToJson(rw)
+	err := data.ToJson(pl, rw)
 	if err != nil {
 		p.l.Error("Failed to List product", zap.Error(err))
 		http.Error(rw, "Failed to list products", http.StatusInternalServerError)
@@ -66,13 +66,13 @@ func (p *Products) CreateProduct(rw http.ResponseWriter, r *http.Request) {
 	prod := r.Context().Value(ProductKey{}).(*data.Product)
 	data.AppnedPorduct(prod)
 	rw.Header().Add("Content-Type", "application/json")
-	prod.ToJson(rw)
+	data.ToJson(prod, rw)
 	p.l.Info("Create Product Response: ", zap.String("remoteAddr", r.RemoteAddr), zap.String("method", r.Method), zap.String("url", r.URL.Path), zap.Int("status", http.StatusOK))
 }
 
 func JsonToProduct(r *http.Request, l *zap.Logger) *data.Product {
 	p := &data.Product{}
-	errorToJson := p.FromJson(r.Body)
+	errorToJson := data.FromJson(p, r.Body)
 	if errorToJson != nil {
 		l.Error("Failed to encode product", zap.Error(errorToJson))
 		return nil
@@ -113,7 +113,7 @@ func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 	pl := data.GetProductsList()
 	prod := pl[pi]
 	rw.Header().Add("Content-Type", "application/json")
-	prodErr := prod.ToJson(rw)
+	prodErr := data.ToJson(prod, rw)
 	if prodErr != nil {
 		p.l.Error("Failed to get product", zap.Error(err))
 		http.Error(rw, "Failed to get product", http.StatusInternalServerError)
@@ -144,7 +144,7 @@ func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p.l.Info("Delete Procut", zap.Int("id", productId))
-	delErr := data.DeleteProductByID(productId)
+	delErr := data.DeleteProduct(productId)
 	if delErr != nil {
 		p.l.Error("Failed to delete product", zap.Error(delErr))
 		http.Error(rw, fmt.Sprintf("Bad request, could not delete product %v", delErr), http.StatusBadRequest)
@@ -187,9 +187,9 @@ func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 	prod := r.Context().Value(ProductKey{}).(*data.Product)
 	//we already validated the product id to be valie so we ignore the returned error here!
 	// TODO: maybe we don't need the bool return of the update product!
-	pp, _ := data.UpdateProduct(prod, productId)
+	updatedProd, _ := data.UpdateProduct(prod, productId)
 
 	rw.Header().Add("Content-Type", "application/json")
-	pp.ToJson(rw)
+	data.ToJson(updatedProd, rw)
 	p.l.Info("Update Products Response: ", zap.String("remoteAddr", r.RemoteAddr), zap.String("method", r.Method), zap.String("url", r.URL.Path), zap.Int("status", http.StatusOK))
 }
