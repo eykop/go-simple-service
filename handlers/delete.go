@@ -26,6 +26,8 @@ func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
+	// we now have validator in the path param of a regexp of [0-9]+, so wif a product id of not number is sent
+	// we will get here  when the user send a very large number (upper limit of int)
 	productId, err := strconv.Atoi(id)
 	if err != nil {
 		p.l.Error("Failed to delete product", zap.Error(err))
@@ -39,5 +41,7 @@ func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, fmt.Sprintf("Bad request, could not delete product %v", delErr), http.StatusBadRequest)
 		return
 	}
+
+	rw.WriteHeader(http.StatusNoContent)
 
 }
