@@ -15,6 +15,12 @@ A simple microservice with Golang, Mainly done while learning Golang
 - [ ] Dockerfile and Docker compose.
 - [x] Better setup repository and improve documenation.
 - [ ] Add more unit tests.
+  - [ ] utils
+  - [x] create product
+  - [ ] list products
+  - [ ] get product
+  - [ ] delete product
+  - [ ] update product
 - [ ] Add some authentication (proably some JWT).
 - [ ] Add some permissions for calling APIs.
 - [x] Refactor code and make more order.
@@ -48,16 +54,16 @@ This will generate the following files:
 
 ```shell
 ├── docs --> the swagger docs folder ( already found in repo)
-│ ├── docs.go --> the swagger docs module ( already found in repo), this will help http server the docs
+│ ├── docs.go --> the swagger docs module ( already found in repo), this will help http serve the docs
 │ ├── swagger.json --> the swagger specification json file ( already found in repo)
 │ └── swagger.yaml --> the swagger specification yaml file ( already found in repo)
 ```
 
-Finally for running the endpoint unit tests, we use swagger to auto generated a go client:
+Finally for running the endpoint calls with a cli client, we can use swagger to auto generated a go client:
 
 `swagger generate client -f docs/swagger.yaml -t client`
 
-This will generate the following client package and modules, it is mainly used and needed to run unit tests,
+This will generate the following client package and modules,
 Please note this is not and should not be part of the repository as this is an auto generated code that should not
 be maintained nor modified by us.
 
