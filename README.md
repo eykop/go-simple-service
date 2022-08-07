@@ -18,8 +18,8 @@ A simple microservice with Golang, Mainly done while learning Golang
   - [ ] utils
   - [x] create product
   - [ ] list products
-  - [ ] get product
-  - [ ] delete product
+  - [x] get product
+  - [x] delete product
   - [ ] update product
 - [ ] Add some authentication (proably some JWT).
 - [ ] Add some permissions for calling APIs.

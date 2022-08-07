@@ -27,7 +27,6 @@ func (suite *GetTestSuite) SetupTest() {
 	for _, product := range data.GetProductsList() {
 		suite.logger.Debug("found product in list: ", zap.Int("id", product.ID), zap.String("name", product.Name))
 	}
-	//suite.Equal(2, len(data.GetProductsList()), "list of product not 2.")
 }
 
 func (s *GetTestSuite) TearDownTest() {

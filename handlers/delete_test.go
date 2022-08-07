@@ -19,25 +19,24 @@ type DeleteTestSuite struct {
 	logger *zap.Logger
 }
 
-func (g *DeleteTestSuite) SetupSuite() {
-	g.logger, _ = zap.NewDevelopment()
+func (suite *DeleteTestSuite) SetupSuite() {
+	suite.logger, _ = zap.NewDevelopment()
 }
 
 func (suite *DeleteTestSuite) SetupTest() {
 	for _, product := range data.GetProductsList() {
 		suite.logger.Debug("found product in list: ", zap.Int("id", product.ID), zap.String("name", product.Name))
 	}
-	//suite.Equal(2, len(data.GetProductsList()), "list of product not 2.")
 }
 
-func (s *DeleteTestSuite) TearDownTest() {
+func (suite *DeleteTestSuite) TearDownTest() {
 }
 
-func (g *DeleteTestSuite) TearDownSuite() {
-	defer g.logger.Sync()
+func (suite *DeleteTestSuite) TearDownSuite() {
+	defer suite.logger.Sync()
 }
 
-func TestGDeleteProductSuite(t *testing.T) {
+func TestDeleteProductSuite(t *testing.T) {
 	suite.Run(t, new(DeleteTestSuite))
 }
 
