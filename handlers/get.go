@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"simplems/data"
 
@@ -43,15 +44,15 @@ func (p *Products) ListProducts(rw http.ResponseWriter, r *http.Request) {
 // @Router       /products/{id} [get]
 func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 
-	productId := getProductId(r, p.l)
-	if productId == -1 {
-		http.Error(rw, "Bad request, could not get product id", http.StatusBadRequest)
+	productId, err := getProductId(r, p.l)
+	if err != nil {
+		http.Error(rw, "Invalid product id.", http.StatusBadRequest)
 		return
 	}
 	p.l.Info("Get Procut", zap.Int("id", productId))
 	pi := data.GetProductIndexById(productId)
 	if pi == -1 {
-		http.Error(rw, "Failed to get new product invlaid product id", http.StatusBadRequest)
+		http.Error(rw, fmt.Sprintf("No product with id `%d` was found.", productId), http.StatusBadRequest)
 		return
 	}
 
@@ -60,8 +61,8 @@ func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("Content-Type", "application/json")
 	prodErr := data.ToJson(prod, rw)
 	if prodErr != nil {
-		p.l.Error("Failed to get product", zap.Error(prodErr))
-		http.Error(rw, "Failed to get product", http.StatusInternalServerError)
+		p.l.Error("Failed to encode product.", zap.Error(prodErr))
+		http.Error(rw, "Failed to encode product.", http.StatusInternalServerError)
 	}
 	p.l.Info("Get Product Response", zap.String("remoteAddr", r.RemoteAddr), zap.String("method", r.Method), zap.String("url", r.URL.Path), zap.Int("status", http.StatusOK))
 }

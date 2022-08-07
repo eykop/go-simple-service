@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"simplems/data"
-	"strconv"
 
-	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )
 
@@ -23,17 +21,13 @@ import (
 // @Failure      500  {object}  HTTPError
 // @Router       /products/{id} [delete]
 func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
 
-	// we now have validator in the path param of a regexp of [0-9]+, so wif a product id of not number is sent
-	// we will get here  when the user send a very large number (upper limit of int)
-	productId, err := strconv.Atoi(id)
+	productId, err := getProductId(r, p.l)
 	if err != nil {
-		p.l.Error("Failed to delete product", zap.Error(err))
 		http.Error(rw, "Bad request, could not get product id", http.StatusBadRequest)
 		return
 	}
+
 	p.l.Info("Delete Procut", zap.Int("id", productId))
 	delErr := data.DeleteProduct(productId)
 	if delErr != nil {

@@ -22,14 +22,16 @@ func JsonToProduct(r *http.Request, l *zap.Logger) *data.Product {
 
 // Parses product ID from request path parameter.
 // returns -1 if failed to parse a valid product id.
-func getProductId(r *http.Request, l *zap.Logger) int {
+func getProductId(r *http.Request, l *zap.Logger) (int, error) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
+	// we now have validator in the path param of a regexp of [0-9]+, so wif a product id of not number is sent
+	// we will get here  when the user send a very large number (upper limit of int)
 	productId, err := strconv.Atoi(id)
 	if err != nil {
-		l.Error("Failed to parse product id", zap.Error(err))
-		return -1
+		l.Error("Failed to parse product id", zap.String("string", id), zap.Error(err))
 	}
-	return productId
+	l.Debug("Parsed product id", zap.String("string", id))
+	return productId, err
 }

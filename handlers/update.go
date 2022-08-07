@@ -22,8 +22,8 @@ import (
 // @Router       /products/{id} [patch]
 func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 
-	productId := getProductId(r, p.l)
-	if productId == -1 {
+	productId, err := getProductId(r, p.l)
+	if err != nil {
 		http.Error(rw, "Bad request, could not get product id", http.StatusBadRequest)
 		return
 	}
