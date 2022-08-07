@@ -20,10 +20,9 @@ func (p *Products) ListProducts(rw http.ResponseWriter, r *http.Request) {
 
 	pl := data.GetProductsList()
 	rw.Header().Add("Content-Type", "application/json")
-	// rw.WriteHeader(http.StatusOK)
 	err := data.ToJson(pl, rw)
 	if err != nil {
-		p.l.Error("Failed to List product", zap.Error(err))
+		p.l.Error("Failed to List products", zap.Error(err))
 		http.Error(rw, "Failed to list products", http.StatusInternalServerError)
 	}
 	p.l.Info("List Products Response", zap.String("remoteAddr", r.RemoteAddr), zap.String("method", r.Method), zap.String("url", r.URL.Path), zap.Int("status", http.StatusOK))
