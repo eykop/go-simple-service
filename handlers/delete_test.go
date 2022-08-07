@@ -33,7 +33,7 @@ func TestDeleteProductBadProductId(t *testing.T) {
 		Handler(app.NewApplication(logger).Router).
 		Delete("/products/200/").
 		Expect(t).
-		Body("Bad request, could not delete product Product Id 200 not found\n").
+		Body("Failed to `DELETE` product, invalid product id.\n").
 		Status(http.StatusBadRequest).
 		End()
 }
@@ -47,7 +47,7 @@ func TestDeleteProductProductIdExceedsLimit(t *testing.T) {
 		Handler(app.NewApplication(logger).Router).
 		Delete(fmt.Sprintf("/products/%d/", uint64(exceeded_id))).
 		Expect(t).
-		Body("Bad request, could not get product id\n").
+		Body("Invalid product id.\n").
 		Status(http.StatusBadRequest).
 		End()
 }

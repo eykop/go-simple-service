@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"simplems/data"
 
@@ -44,20 +43,9 @@ func (p *Products) ListProducts(rw http.ResponseWriter, r *http.Request) {
 // @Router       /products/{id} [get]
 func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 
-	productId, err := getProductId(r, p.l)
-	if err != nil {
-		http.Error(rw, "Invalid product id.", http.StatusBadRequest)
-		return
-	}
-	p.l.Info("Get Procut", zap.Int("id", productId))
-	pi := data.GetProductIndexById(productId)
-	if pi == -1 {
-		http.Error(rw, fmt.Sprintf("No product with id `%d` was found.", productId), http.StatusBadRequest)
-		return
-	}
-
+	prodIndex := r.Context().Value(ProductIndexKey{}).(int)
 	pl := data.GetProductsList()
-	prod := pl[pi]
+	prod := pl[prodIndex]
 	rw.Header().Add("Content-Type", "application/json")
 	prodErr := data.ToJson(prod, rw)
 	if prodErr != nil {

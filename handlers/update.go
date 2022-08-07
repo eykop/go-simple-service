@@ -22,23 +22,9 @@ import (
 // @Router       /products/{id} [patch]
 func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 
-	productId, err := getProductId(r, p.l)
-	if err != nil {
-		http.Error(rw, "Bad request, could not get product id", http.StatusBadRequest)
-		return
-	}
-	p.l.Info("Update Procut", zap.Int("id", productId))
-
-	if data.GetProductIndexById(productId) == -1 {
-		p.l.Error("Failed to update produc, invalid product id.", zap.Int("id", productId))
-		http.Error(rw, "Failed to update new product invlaid product id", http.StatusBadRequest)
-		return
-
-	}
-	prod := r.Context().Value(ProductKey{}).(*data.Product)
-	//we already validated the product id to be valie so we ignore the returned error here!
-	// TODO: maybe we don't need the bool return of the update product!
-	updatedProd, _ := data.UpdateProduct(prod, productId)
+	incommingProd := r.Context().Value(ProductKey{}).(*data.Product)
+	prodIndex := r.Context().Value(ProductIndexKey{}).(int)
+	updatedProd, _ := data.UpdateProduct(incommingProd, prodIndex)
 
 	rw.Header().Add("Content-Type", "application/json")
 	data.ToJson(updatedProd, rw)

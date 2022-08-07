@@ -4,6 +4,8 @@ import "go.uber.org/zap"
 
 type ProductKey struct{}
 
+type ProductIndexKey struct{}
+
 type Products struct {
 	l *zap.Logger
 }

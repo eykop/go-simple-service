@@ -22,7 +22,7 @@ func JsonToProduct(r *http.Request, l *zap.Logger) *data.Product {
 
 // Parses product ID from request path parameter.
 // returns -1 if failed to parse a valid product id.
-func getProductId(r *http.Request, l *zap.Logger) (int, error) {
+func GetProductId(r *http.Request, l *zap.Logger) (int, error) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 

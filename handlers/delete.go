@@ -22,20 +22,12 @@ import (
 // @Router       /products/{id} [delete]
 func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
 
-	productId, err := getProductId(r, p.l)
-	if err != nil {
-		http.Error(rw, "Bad request, could not get product id", http.StatusBadRequest)
-		return
-	}
-
-	p.l.Info("Delete Procut", zap.Int("id", productId))
-	delErr := data.DeleteProduct(productId)
+	prodIndex := r.Context().Value(ProductIndexKey{}).(int)
+	delErr := data.DeleteProduct(prodIndex)
 	if delErr != nil {
 		p.l.Error("Failed to delete product", zap.Error(delErr))
 		http.Error(rw, fmt.Sprintf("Bad request, could not delete product %v", delErr), http.StatusBadRequest)
 		return
 	}
-
 	rw.WriteHeader(http.StatusNoContent)
-
 }

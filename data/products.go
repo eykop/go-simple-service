@@ -3,8 +3,6 @@ package data
 import (
 	"fmt"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type Product struct {
@@ -29,36 +27,35 @@ func AppnedPorduct(p *Product) {
 	productsList = append(productsList, p)
 }
 
-func UpdateProduct(updatedProductData *Product, id int) (*Product, bool) {
-	pi := GetProductIndexById(id)
-	if pi == -1 {
-		return nil, false
+func UpdateProduct(incommingProd *Product, index int) (*Product, bool) {
+	//add logger
+	p := productsList[index]
+	if incommingProd.Name != "" {
+		p.Name = incommingProd.Name
 	}
-	p := productsList[pi]
-	if updatedProductData.Name != "" {
-		p.Name = updatedProductData.Name
+	if incommingProd.Description != "" {
+		p.Description = incommingProd.Description
 	}
-	if updatedProductData.Description != "" {
-		p.Description = updatedProductData.Description
+	if incommingProd.SKU != "" {
+		p.SKU = incommingProd.SKU
 	}
-	if updatedProductData.SKU != "" {
-		p.SKU = updatedProductData.SKU
-	}
-	if updatedProductData.Price > 0 {
-		p.Price = updatedProductData.Price
+	if incommingProd.Price > 0 {
+		p.Price = incommingProd.Price
 	}
 	p.UpdatedOn = time.Now().UTC().String()
 	return p, true
 }
 
-func DeleteProduct(id int) error {
-	if id < 0 || id > len(productsList)-1 {
-		return fmt.Errorf("Product Id %d not found", id)
+func DeleteProduct(index int) error {
+	// todo add logger l.Info("Delete Procut", zap.Int("id", productId))
+
+	if index < 0 || index > len(productsList)-1 {
+		return fmt.Errorf("Product Id %d not found", index)
 	}
-	if id == len(productsList) {
-		productsList = productsList[:id]
+	if index == len(productsList) {
+		productsList = productsList[:index]
 	} else {
-		productsList = append(productsList[:id], productsList[id+1:]...)
+		productsList = append(productsList[:index], productsList[index+1:]...)
 	}
 	return nil
 
@@ -70,7 +67,7 @@ var productsList = []*Product{
 		Name:        "Espresso",
 		Description: "Lite coffe drink...",
 		Price:       1.49,
-		SKU:         uuid.New().String(),
+		SKU:         "5faf1ada-5d01-4831-aa0c-8f93eec9d86e",
 		CreatedOn:   time.Now().UTC().String(),
 		UpdatedOn:   time.Now().UTC().String(),
 	},
@@ -79,7 +76,7 @@ var productsList = []*Product{
 		Name:        "Latte",
 		Description: "Lite coffe drink with milk...",
 		Price:       2.49,
-		SKU:         uuid.New().String(),
+		SKU:         "a345d9d6-0c08-45a2-887a-4c22594737b3",
 		CreatedOn:   time.Now().UTC().String(),
 		UpdatedOn:   time.Now().UTC().String(),
 	},
