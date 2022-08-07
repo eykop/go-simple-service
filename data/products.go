@@ -22,7 +22,7 @@ func GetProductsList() Products {
 	return productsList
 }
 
-func AppnedPorduct(p *Product) {
+func AddPorduct(p *Product) {
 	p.ID = getNextProductId()
 	productsList = append(productsList, p)
 }
