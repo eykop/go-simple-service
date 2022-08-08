@@ -27,8 +27,13 @@ func AddPorduct(p *Product) {
 	productsList = append(productsList, p)
 }
 
-func UpdateProduct(incommingProd *Product, index int) (*Product, bool) {
+func UpdateProduct(incommingProd *Product, index int) error {
 	//add logger
+	if index < 0 || index > len(productsList)-1 {
+
+		return fmt.Errorf("update error, product index %d out of range", index)
+	}
+
 	p := productsList[index]
 	if incommingProd.Name != "" {
 		p.Name = incommingProd.Name
@@ -43,14 +48,14 @@ func UpdateProduct(incommingProd *Product, index int) (*Product, bool) {
 		p.Price = incommingProd.Price
 	}
 	p.UpdatedOn = time.Now().UTC().String()
-	return p, true
+	return nil
 }
 
 func DeleteProduct(index int) error {
 	// todo add logger l.Info("Delete Procut", zap.Int("id", productId))
 
 	if index < 0 || index > len(productsList)-1 {
-		return fmt.Errorf("Product Id %d not found", index)
+		return fmt.Errorf("deletion error, product index %d out of range", index)
 	}
 	if index == len(productsList) {
 		productsList = productsList[:index]
