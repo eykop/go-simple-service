@@ -15,7 +15,7 @@ A simple microservice with Golang, Mainly done while learning Golang
 - [ ] Dockerfile and Docker compose.
 - [x] Better setup repository and improve documenation.
 - [ ] Add more unit tests.
-  - [ ] utils
+  - [x] utils
   - [x] create product
   - [ ] list products
   - [x] get product
