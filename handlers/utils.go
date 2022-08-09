@@ -32,6 +32,5 @@ func GetProductId(r *http.Request, l *zap.Logger) (int, error) {
 	if err != nil {
 		l.Error("Failed to parse product id", zap.String("string", id), zap.Error(err))
 	}
-	l.Debug("Parsed product id", zap.String("string", id))
 	return productId, err
 }

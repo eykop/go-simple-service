@@ -42,7 +42,7 @@ func (p *Products) ListProducts(rw http.ResponseWriter, r *http.Request) {
 // @Router       /products/{id} [get]
 func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 
-	prodIndex := r.Context().Value(ProductIndexKey{}).(int)
+	prodIndex := r.Context().Value(ValidatedProductIndexKey{}).(int)
 	pl := data.GetProductsList()
 	prod := pl[prodIndex]
 	rw.Header().Add("Content-Type", "application/json")

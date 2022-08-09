@@ -38,7 +38,7 @@ func ValidateProductIdMiddleware(l *zap.Logger) func(http.Handler) http.Handler 
 				}
 				l.Info("Got product index from request:", zap.Int("index", pIndex))
 				// add the product to the context
-				ctx := context.WithValue(r.Context(), handlers.ProductIndexKey{}, pIndex)
+				ctx := context.WithValue(r.Context(), handlers.ValidatedProductIndexKey{}, pIndex)
 				r = r.WithContext(ctx)
 			}
 			// Call the next handler, which can be another middleware in the chain, or the final handler.

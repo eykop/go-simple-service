@@ -23,7 +23,7 @@ import (
 func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 
 	incommingProd := r.Context().Value(ProductKey{}).(*data.Product)
-	prodIndex := r.Context().Value(ProductIndexKey{}).(int)
+	prodIndex := r.Context().Value(ValidatedProductIndexKey{}).(int)
 	err := data.UpdateProduct(incommingProd, prodIndex)
 	if err != nil {
 		p.l.Error("Failed to update product.", zap.Error(err))

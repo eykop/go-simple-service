@@ -1,11 +1,8 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"simplems/data"
-
-	"go.uber.org/zap"
 )
 
 // DeleteProduct godoc
@@ -21,13 +18,7 @@ import (
 // @Failure      500  {object}  HTTPError
 // @Router       /products/{id} [delete]
 func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
-
-	prodIndex := r.Context().Value(ProductIndexKey{}).(int)
-	delErr := data.DeleteProduct(prodIndex)
-	if delErr != nil {
-		p.l.Error("Failed to delete product", zap.Error(delErr))
-		http.Error(rw, fmt.Sprintf("Bad request, could not delete product %v", delErr), http.StatusBadRequest)
-		return
-	}
+	prodIndex := r.Context().Value(ValidatedProductIndexKey{}).(int)
+	data.DeleteProduct(prodIndex)
 	rw.WriteHeader(http.StatusNoContent)
 }
