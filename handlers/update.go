@@ -22,7 +22,7 @@ import (
 // @Router       /products/{id} [patch]
 func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 
-	incommingProd := r.Context().Value(ProductKey{}).(*data.Product)
+	incommingProd := r.Context().Value(ProductKey{}).(data.ProductInterface)
 	prodIndex := r.Context().Value(ValidatedProductIndexKey{}).(int)
 	err := data.UpdateProduct(incommingProd, prodIndex)
 	if err != nil {
@@ -30,8 +30,8 @@ func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Failed to update product.", http.StatusBadRequest)
 	}
 
-	updatedProd := data.GetProductsList()[prodIndex]
+	updatedProd := data.GetProductByIndex(prodIndex)
 	rw.Header().Add("Content-Type", "application/json")
-	data.ToJson(updatedProd, rw)
+	updatedProd.ToJson(rw)
 	p.l.Info("Update Products Response: ", zap.String("remoteAddr", r.RemoteAddr), zap.String("method", r.Method), zap.String("url", r.URL.Path), zap.Int("status", http.StatusOK))
 }

@@ -24,8 +24,9 @@ func (suite *DeleteTestSuite) SetupSuite() {
 }
 
 func (suite *DeleteTestSuite) SetupTest() {
-	for _, product := range data.GetProductsList() {
-		suite.logger.Debug("found product in list: ", zap.Int("id", product.ID), zap.String("name", product.Name))
+	for _, product := range *data.GetProductsList() {
+		foo := product.(*data.Product)
+		suite.logger.Debug("found product in list: ", zap.Int("id", foo.ID), zap.String("name", foo.Name))
 	}
 }
 

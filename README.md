@@ -16,8 +16,8 @@ A simple microservice with Golang, Mainly done while learning Golang
 - [x] Better setup repository and improve documenation.
 - [ ] Add more unit tests.
   - [x] utils
-  - [x] create product
-  - [ ] list products
+  - [ ] create product
+  - [x] list products
   - [x] get product
   - [x] delete product
   - [ ] update product

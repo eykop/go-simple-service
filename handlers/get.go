@@ -17,10 +17,8 @@ import (
 // @Failure      500  {object}  HTTPError
 // @Router      /products/ [get]
 func (p *Products) ListProducts(rw http.ResponseWriter, r *http.Request) {
-
-	pl := data.GetProductsList()
 	rw.Header().Add("Content-Type", "application/json")
-	err := data.ToJson(pl, rw)
+	err := data.GetProductsList().ToJson(rw)
 	if err != nil {
 		p.l.Error("Failed to List products", zap.Error(err))
 		http.Error(rw, "Failed to list products", http.StatusInternalServerError)
@@ -43,10 +41,8 @@ func (p *Products) ListProducts(rw http.ResponseWriter, r *http.Request) {
 func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 
 	prodIndex := r.Context().Value(ValidatedProductIndexKey{}).(int)
-	pl := data.GetProductsList()
-	prod := pl[prodIndex]
 	rw.Header().Add("Content-Type", "application/json")
-	prodErr := data.ToJson(prod, rw)
+	prodErr := data.GetProductByIndex(prodIndex).ToJson(rw)
 	if prodErr != nil {
 		p.l.Error("Failed to encode product.", zap.Error(prodErr))
 		http.Error(rw, "Failed to encode product.", http.StatusInternalServerError)

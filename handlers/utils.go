@@ -10,9 +10,11 @@ import (
 )
 
 // Encodes a json data into a Prodct object
-func JsonToProduct(r *http.Request, l *zap.Logger) *data.Product {
+func JsonToProduct(r *http.Request, l *zap.Logger) data.ProductInterface {
+	// TODO: get product type from request and create the relevant product instance
+	// it could be Product or DummyProduct ...
 	p := &data.Product{}
-	errorToJson := data.FromJson(p, r.Body)
+	errorToJson := p.FromJson(r.Body)
 	if errorToJson != nil {
 		l.Error("Failed to encode product", zap.Error(errorToJson))
 		return nil

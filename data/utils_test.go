@@ -17,8 +17,8 @@ type UtilsTestSuite struct {
 
 func (suite *UtilsTestSuite) SetupSuite() {
 	suite.logger, _ = zap.NewDevelopment()
-	productsList = []*Product{
-		{
+	productsList = &Products{
+		&Product{
 			ID:          0,
 			Name:        "Espresso",
 			Description: "Lite coffe drink...",
@@ -27,7 +27,7 @@ func (suite *UtilsTestSuite) SetupSuite() {
 			CreatedOn:   time.Now().UTC().String(),
 			UpdatedOn:   time.Now().UTC().String(),
 		},
-		{
+		&Product{
 			ID:          3,
 			Name:        "Latte",
 			Description: "Lite coffe drink with milk...",
@@ -48,6 +48,26 @@ func (suite *UtilsTestSuite) TearDownTest() {
 
 func (suite *UtilsTestSuite) TearDownSuite() {
 	defer suite.logger.Sync()
+	productsList = &Products{
+		&Product{
+			ID:          0,
+			Name:        "Espresso",
+			Description: "Lite coffe drink...",
+			Price:       1.49,
+			SKU:         "5faf1ada-5d01-4831-aa0c-8f93eec9d86e",
+			CreatedOn:   time.Now().UTC().String(),
+			UpdatedOn:   time.Now().UTC().String(),
+		},
+		&Product{
+			ID:          3,
+			Name:        "Latte",
+			Description: "Lite coffe drink with milk...",
+			Price:       2.49,
+			SKU:         "a345d9d6-0c08-45a2-887a-4c22594737b3",
+			CreatedOn:   time.Now().UTC().String(),
+			UpdatedOn:   time.Now().UTC().String(),
+		},
+	}
 }
 
 func TestUtilsSuite(t *testing.T) {
@@ -69,7 +89,7 @@ func (suite *UtilsTestSuite) TestFailGetProductIndexById() {
 
 func (suite *UtilsTestSuite) TestToJson() {
 	var strBuffer bytes.Buffer
-	ToJson(productsList[0], &strBuffer)
+	(*productsList)[0].(*Product).ToJson(&strBuffer)
 	assert.Equal(suite.T(), `{"id":0,"name":"Espresso","descripton":"Lite coffe drink...","price":1.49,"sku":"5faf1ada-5d01-4831-aa0c-8f93eec9d86e"}`+"\n", strBuffer.String())
 }
 
@@ -77,12 +97,17 @@ func (suite *UtilsTestSuite) TestFromJson() {
 	prod := &Product{}
 	var strBuffer bytes.Buffer
 	strBuffer.WriteString(`{"id":0,"name":"Espresso","descripton":"Lite coffe drink...","price":1.49,"sku":"5faf1ada-5d01-4831-aa0c-8f93eec9d86e"}`)
-	assert.NoError(suite.T(), FromJson(prod, &strBuffer))
+	// fromJson(prod, &strBuffer)
+	// assert.Equal(suite.T(), "Espresso", prod.Name)
+	err := prod.FromJson(&strBuffer)
+	assert.NoError(suite.T(), err)
+	assert.Nil(suite.T(), err)
+	assert.Equal(suite.T(), "Espresso", prod.Name)
 }
 
 func (suite *UtilsTestSuite) TestFromJsonFail() {
 	prod := &Product{}
 	var strBuffer bytes.Buffer
 	strBuffer.WriteString(`not json`)
-	assert.Error(suite.T(), FromJson(prod, &strBuffer))
+	assert.Error(suite.T(), prod.FromJson(&strBuffer))
 }

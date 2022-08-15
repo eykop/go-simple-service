@@ -2,72 +2,93 @@ package data
 
 import (
 	"fmt"
+	"io"
 	"time"
 )
 
-type Product struct {
-	ID          int     `json:"id"`
-	Name        string  `json:"name" validate:"required"`
-	Description string  `json:"descripton"`
-	Price       float32 `json:"price" validate:"gt=0"`
-	SKU         string  `json:"sku" validate:"sku"`
-	CreatedOn   string  `json:"-"`
-	UpdatedOn   string  `json:"-"`
-	DeletedOn   string  `json:"-"`
+type ProductInterface interface {
+	ToJson(w io.Writer) error
+	FromJson(r io.Reader) error
+	GetID() int
+	GetName() string
+	SetID(id int)
+	UpdateProduct(updated ProductInterface)
+	Validate() error
 }
 
-type Products []*Product
+type Products []ProductInterface
 
-func GetProductsList() Products {
+func ProductsCount() int {
+	return len(*productsList)
+}
+
+func GetProductByIndex(index int) ProductInterface {
+	if index < 0 || index > len(*productsList)-1 {
+		//fmt.Errorf("update error, product index %d out of range", index)
+		return nil
+	}
+	return (*productsList)[index]
+
+}
+func GetProductsList() *Products {
 	return productsList
 }
 
-func AddPorduct(p *Product) {
-	p.ID = getNextProductId()
-	productsList = append(productsList, p)
+func AddPorduct(p ProductInterface) {
+	p.SetID(getNextProductId())
+	*productsList = append(*productsList, p)
 }
 
-func UpdateProduct(incommingProd *Product, index int) error {
+func UpdateProduct(incommingProd ProductInterface, index int) error {
 	//add logger
-	if index < 0 || index > len(productsList)-1 {
+	if index < 0 || index > len(*productsList)-1 {
 
 		return fmt.Errorf("update error, product index %d out of range", index)
 	}
-
-	p := productsList[index]
-	if incommingProd.Name != "" {
-		p.Name = incommingProd.Name
-	}
-	if incommingProd.Description != "" {
-		p.Description = incommingProd.Description
-	}
-	if incommingProd.SKU != "" {
-		p.SKU = incommingProd.SKU
-	}
-	if incommingProd.Price > 0 {
-		p.Price = incommingProd.Price
-	}
-	p.UpdatedOn = time.Now().UTC().String()
+	p := (*productsList)[index]
+	p.UpdateProduct(incommingProd)
 	return nil
 }
 
 func DeleteProduct(index int) error {
 	// todo add logger l.Info("Delete Procut", zap.Int("id", productId))
 
-	if index < 0 || index > len(productsList)-1 {
+	if index < 0 || index > len(*productsList)-1 {
 		return fmt.Errorf("deletion error, product index %d out of range", index)
 	}
-	if index == len(productsList) {
-		productsList = productsList[:index]
+	if index == len(*productsList) {
+		*productsList = (*productsList)[:index]
 	} else {
-		productsList = append(productsList[:index], productsList[index+1:]...)
+		*productsList = append((*productsList)[:index], (*productsList)[index+1:]...)
 	}
 	return nil
 
 }
 
-var productsList = []*Product{
-	{
+func getNextProductId() int {
+	if len(*productsList) == 0 {
+		return 0
+	}
+	lastProduct := (*productsList)[len(*productsList)-1]
+	return lastProduct.GetID() + 1
+}
+
+func GetProductIndexById(id int) int {
+	for index, product := range *productsList {
+		if product.GetID() == id {
+			return index
+		}
+
+	}
+	return -1
+}
+
+func (pl *Products) ToJson(w io.Writer) error {
+	return toJson(pl, w)
+}
+
+var productsList = &Products{
+	&Product{
 		ID:          0,
 		Name:        "Espresso",
 		Description: "Lite coffe drink...",
@@ -76,7 +97,7 @@ var productsList = []*Product{
 		CreatedOn:   time.Now().UTC().String(),
 		UpdatedOn:   time.Now().UTC().String(),
 	},
-	{
+	&Product{
 		ID:          1,
 		Name:        "Latte",
 		Description: "Lite coffe drink with milk...",

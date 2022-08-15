@@ -22,9 +22,9 @@ import (
 func (p *Products) CreateProduct(rw http.ResponseWriter, r *http.Request) {
 
 	p.l.Info("Will create a new product")
-	prod := r.Context().Value(ProductKey{}).(*data.Product)
+	prod := r.Context().Value(ProductKey{}).(data.ProductInterface)
 	data.AddPorduct(prod)
 	rw.Header().Add("Content-Type", "application/json")
-	data.ToJson(prod, rw)
+	prod.ToJson(rw)
 	p.l.Info("Create Product Response: ", zap.String("remoteAddr", r.RemoteAddr), zap.String("method", r.Method), zap.String("url", r.URL.Path), zap.Int("status", http.StatusOK))
 }

@@ -22,8 +22,8 @@ func (suite *ProductTestSuite) SetupSuite() {
 
 func (suite *ProductTestSuite) SetupTest() {
 
-	productsList = []*Product{
-		{
+	productsList = &Products{
+		&Product{
 			ID:          0,
 			Name:        "Espresso",
 			Description: "Lite coffe drink...",
@@ -32,7 +32,7 @@ func (suite *ProductTestSuite) SetupTest() {
 			CreatedOn:   time.Now().UTC().String(),
 			UpdatedOn:   time.Now().UTC().String(),
 		},
-		{
+		&Product{
 			ID:          2,
 			Name:        "Arabica",
 			Description: "Arabica coffe drink without milk...",
@@ -41,7 +41,7 @@ func (suite *ProductTestSuite) SetupTest() {
 			CreatedOn:   time.Now().UTC().String(),
 			UpdatedOn:   time.Now().UTC().String(),
 		},
-		{
+		&Product{
 			ID:          3,
 			Name:        "Latte",
 			Description: "Lite coffe drink with milk...",
@@ -51,7 +51,7 @@ func (suite *ProductTestSuite) SetupTest() {
 			UpdatedOn:   time.Now().UTC().String(),
 		},
 	}
-	suite.initialProductSize = len(GetProductsList())
+	suite.initialProductSize = len(*GetProductsList())
 	assert.Equal(suite.T(), 3, suite.initialProductSize)
 
 }
@@ -61,6 +61,26 @@ func (suite *ProductTestSuite) TearDownTest() {
 
 func (suite *ProductTestSuite) TearDownSuite() {
 	defer suite.logger.Sync()
+	productsList = &Products{
+		&Product{
+			ID:          0,
+			Name:        "Espresso",
+			Description: "Lite coffe drink...",
+			Price:       1.49,
+			SKU:         "5faf1ada-5d01-4831-aa0c-8f93eec9d86e",
+			CreatedOn:   time.Now().UTC().String(),
+			UpdatedOn:   time.Now().UTC().String(),
+		},
+		&Product{
+			ID:          3,
+			Name:        "Latte",
+			Description: "Lite coffe drink with milk...",
+			Price:       2.49,
+			SKU:         "a345d9d6-0c08-45a2-887a-4c22594737b3",
+			CreatedOn:   time.Now().UTC().String(),
+			UpdatedOn:   time.Now().UTC().String(),
+		},
+	}
 }
 
 func TestProductSuite(t *testing.T) {
@@ -68,13 +88,13 @@ func TestProductSuite(t *testing.T) {
 }
 
 func (suite *ProductTestSuite) TestGetProductList() {
-	assert.Equal(suite.T(), suite.initialProductSize, len(GetProductsList()))
+	assert.Equal(suite.T(), suite.initialProductSize, ProductsCount())
 }
 
 func (suite *ProductTestSuite) TestAddPorduct() {
 	prod := &Product{Name: "No 7", Price: 7}
 	AddPorduct(prod)
-	assert.Equal(suite.T(), suite.initialProductSize+1, len(GetProductsList()))
+	assert.Equal(suite.T(), suite.initialProductSize+1, ProductsCount())
 }
 
 func (suite *ProductTestSuite) TestUpdateProductAllFields() {
@@ -82,7 +102,7 @@ func (suite *ProductTestSuite) TestUpdateProductAllFields() {
 	err := UpdateProduct(prod, 0)
 	assert.NoError(suite.T(), err)
 
-	upProd := productsList[0]
+	upProd := (*GetProductsList())[0].(*Product)
 
 	//check the product return by update
 	assert.Equal(suite.T(), prod.Name, upProd.Name)
@@ -95,12 +115,12 @@ func (suite *ProductTestSuite) TestUpdateProductAllFields() {
 
 func (suite *ProductTestSuite) TestUpdateProductPartialFields() {
 	prod := &Product{Name: "No 7", SKU: "sss-sss-sss"}
-	orgProdPrice := productsList[0].Price
-	orgProdDesc := productsList[0].Description
+	orgProdPrice := GetProductByIndex(0).(*Product).Price
+	orgProdDesc := GetProductByIndex(0).(*Product).Description
 	err := UpdateProduct(prod, 0)
 	assert.NoError(suite.T(), err)
 
-	upProd := productsList[0]
+	upProd := GetProductByIndex(0).(*Product)
 
 	//check the product return by update
 	assert.Equal(suite.T(), prod.Name, upProd.Name)
@@ -121,21 +141,21 @@ func (suite *ProductTestSuite) TestUpdateProductBadIndex() {
 
 func (suite *ProductTestSuite) TestDeleteProduct() {
 	assert.NoError(suite.T(), DeleteProduct(0))
-	assert.Equal(suite.T(), suite.initialProductSize-1, len(GetProductsList()))
-	assert.Equal(suite.T(), 2, GetProductsList()[0].ID)
+	assert.Equal(suite.T(), suite.initialProductSize-1, ProductsCount())
+	assert.Equal(suite.T(), 2, GetProductByIndex(0).(*Product).ID)
 }
 
 func (suite *ProductTestSuite) TestDeleteLastProduct() {
-	assert.NoError(suite.T(), DeleteProduct(len(GetProductsList())-1))
-	assert.Equal(suite.T(), suite.initialProductSize-1, len(GetProductsList()))
-	assert.Equal(suite.T(), 0, GetProductsList()[0].ID)
+	assert.NoError(suite.T(), DeleteProduct(ProductsCount()-1))
+	assert.Equal(suite.T(), suite.initialProductSize-1, ProductsCount())
+	assert.Equal(suite.T(), 0, GetProductByIndex(0).(*Product).ID)
 }
 
 func (suite *ProductTestSuite) TestDeleteMiddleProduct() {
-	assert.NoError(suite.T(), DeleteProduct(len(GetProductsList())/2))
-	assert.Equal(suite.T(), suite.initialProductSize-1, len(GetProductsList()))
-	assert.Equal(suite.T(), 0, GetProductsList()[0].ID)
-	assert.Equal(suite.T(), 3, GetProductsList()[len(GetProductsList())-1].ID)
+	assert.NoError(suite.T(), DeleteProduct(ProductsCount()/2))
+	assert.Equal(suite.T(), suite.initialProductSize-1, ProductsCount())
+	assert.Equal(suite.T(), 0, GetProductByIndex(0).(*Product).ID)
+	assert.Equal(suite.T(), 3, GetProductByIndex(len(*GetProductsList())-1).(*Product).ID)
 }
 
 func (suite *ProductTestSuite) TestDeleteProductBadIndex() {
