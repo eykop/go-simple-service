@@ -22,10 +22,6 @@ func (p *Product) GetID() int {
 	return p.ID
 }
 
-func (p *Product) GetName() string {
-	return p.Name
-}
-
 func (p *Product) SetID(id int) {
 	p.ID = id
 }

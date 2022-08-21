@@ -1,6 +1,7 @@
 package data
 
 import (
+	"bytes"
 	"testing"
 	"time"
 
@@ -113,6 +114,14 @@ func (suite *ProductTestSuite) TestUpdateProductAllFields() {
 
 }
 
+func (suite *ProductTestSuite) TestGetProductByIndexOutOfRange() {
+	//index is larger than list items...
+	assert.Nil(suite.T(), GetProductByIndex(ProductsCount()))
+
+	//index is less than zero
+	assert.Nil(suite.T(), GetProductByIndex(-1))
+}
+
 func (suite *ProductTestSuite) TestUpdateProductPartialFields() {
 	prod := &Product{Name: "No 7", SKU: "sss-sss-sss"}
 	orgProdPrice := GetProductByIndex(0).(*Product).Price
@@ -160,4 +169,14 @@ func (suite *ProductTestSuite) TestDeleteMiddleProduct() {
 
 func (suite *ProductTestSuite) TestDeleteProductBadIndex() {
 	assert.Error(suite.T(), DeleteProduct(5))
+}
+
+func (suite *ProductTestSuite) TestNextProductsList() {
+	productsList = &Products{}
+	assert.Equal(suite.T(), 0, getNextProductId())
+}
+
+func (suite *ProductTestSuite) TestProductsToJson() {
+	strBuffer := bytes.Buffer{}
+	assert.NoError(suite.T(), GetProductsList().ToJson(&strBuffer))
 }

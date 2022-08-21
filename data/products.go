@@ -10,7 +10,6 @@ type ProductInterface interface {
 	ToJson(w io.Writer) error
 	FromJson(r io.Reader) error
 	GetID() int
-	GetName() string
 	SetID(id int)
 	UpdateProduct(updated ProductInterface)
 	Validate() error
@@ -56,7 +55,7 @@ func DeleteProduct(index int) error {
 	if index < 0 || index > len(*productsList)-1 {
 		return fmt.Errorf("deletion error, product index %d out of range", index)
 	}
-	if index == len(*productsList) {
+	if index == len(*productsList)-1 {
 		*productsList = (*productsList)[:index]
 	} else {
 		*productsList = append((*productsList)[:index], (*productsList)[index+1:]...)
