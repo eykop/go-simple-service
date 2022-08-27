@@ -7,6 +7,7 @@ import (
 	"simplems/app"
 	"simplems/data"
 	"testing"
+	"time"
 
 	"github.com/steinfletcher/apitest"
 	_ "github.com/stretchr/testify/assert"
@@ -24,7 +25,31 @@ func (suite *DeleteTestSuite) SetupSuite() {
 }
 
 func (suite *DeleteTestSuite) SetupTest() {
-	for _, product := range *data.GetProductsList() {
+	count := data.ProductsInstance().Count()
+	for i := count - 1; i >= 0; i-- {
+		data.ProductsInstance().DeleteProduct(i)
+	}
+
+	data.ProductsInstance().AddPorduct(&data.Product{
+		ID:          0,
+		Name:        "Espresso",
+		Description: "Lite coffe drink...",
+		Price:       1.49,
+		SKU:         "5faf1ada-5d01-4831-aa0c-8f93eec9d86e",
+		CreatedOn:   time.Now().UTC().String(),
+		UpdatedOn:   time.Now().UTC().String(),
+	})
+	data.ProductsInstance().AddPorduct(&data.Product{
+		ID:          1,
+		Name:        "Latte",
+		Description: "Lite coffe drink with milk...",
+		Price:       2.49,
+		SKU:         "a345d9d6-0c08-45a2-887a-4c22594737b3",
+		CreatedOn:   time.Now().UTC().String(),
+		UpdatedOn:   time.Now().UTC().String(),
+	})
+
+	for _, product := range *data.ProductsInstance().GetProductsList() {
 		foo := product.(*data.Product)
 		suite.logger.Debug("found product in list: ", zap.Int("id", foo.ID), zap.String("name", foo.Name))
 	}
@@ -35,6 +60,7 @@ func (suite *DeleteTestSuite) TearDownTest() {
 
 func (suite *DeleteTestSuite) TearDownSuite() {
 	defer suite.logger.Sync()
+
 }
 
 func TestDeleteProductSuite(t *testing.T) {
@@ -86,4 +112,17 @@ func (suite *DeleteTestSuite) TestDeleteStringId() {
 		Body("404 page not found\n").
 		Status(http.StatusNotFound).
 		End()
+}
+
+func (suite *DeleteTestSuite) TestDeleteLastIndex() {
+	count := data.ProductsInstance().Count()
+	for i := count - 1; i >= 0; i-- {
+		apitest.New().
+			Report(apitest.SequenceDiagram()).
+			Handler(app.NewApplication(suite.logger).Router).
+			Delete(fmt.Sprintf("/products/%d/", i)).
+			Expect(suite.T()).
+			Status(http.StatusNoContent).
+			End()
+	}
 }

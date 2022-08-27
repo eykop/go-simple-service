@@ -19,7 +19,7 @@ func ValidateProductIdMiddleware(l *zap.Logger) func(http.Handler) http.Handler 
 			re := regexp.MustCompile("[0-9]+")
 			hasIdInPath := len(re.FindAllString(r.URL.Path, -1)) == 1
 			if !hasIdInPath && r.Method == http.MethodGet {
-				l.Debug("List Products Request", zap.String("url", r.RequestURI), zap.String("method", r.Method))
+				l.Debug("List Products Request", zap.String("url", r.URL.Path), zap.String("method", r.Method))
 			} else if r.Method == http.MethodGet || r.Method == http.MethodPut || r.Method == http.MethodDelete {
 				l.Debug("Request", zap.String("url", r.RequestURI), zap.String("method", r.Method), zap.Bool("decoding", true))
 
@@ -30,7 +30,7 @@ func ValidateProductIdMiddleware(l *zap.Logger) func(http.Handler) http.Handler 
 				}
 
 				l.Info("Parsed product id", zap.Int("id", pid))
-				pIndex := data.GetProductIndexById(pid)
+				pIndex := data.ProductsInstance().GetProductIndexById(pid)
 				if pIndex == -1 {
 					l.Error(fmt.Sprintf("Failed to `%s` product, invalid product id.", r.Method), zap.Int("id", pid))
 					http.Error(w, fmt.Sprintf("Failed to `%s` product, invalid product id.", r.Method), http.StatusBadRequest)

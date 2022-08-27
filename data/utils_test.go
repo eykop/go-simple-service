@@ -12,12 +12,14 @@ import (
 
 type UtilsTestSuite struct {
 	suite.Suite
-	logger *zap.Logger
+	logger   *zap.Logger
+	products *Products
 }
 
 func (suite *UtilsTestSuite) SetupSuite() {
 	suite.logger, _ = zap.NewDevelopment()
-	productsList = &Products{
+	suite.products = &Products{}
+	suite.products.SetProducts(&ProductsList{
 		&Product{
 			ID:          0,
 			Name:        "Espresso",
@@ -36,7 +38,7 @@ func (suite *UtilsTestSuite) SetupSuite() {
 			CreatedOn:   time.Now().UTC().String(),
 			UpdatedOn:   time.Now().UTC().String(),
 		},
-	}
+	})
 }
 
 func (suite *UtilsTestSuite) SetupTest() {
@@ -48,7 +50,7 @@ func (suite *UtilsTestSuite) TearDownTest() {
 
 func (suite *UtilsTestSuite) TearDownSuite() {
 	defer suite.logger.Sync()
-	productsList = &Products{
+	suite.products.SetProducts(&ProductsList{
 		&Product{
 			ID:          0,
 			Name:        "Espresso",
@@ -67,7 +69,7 @@ func (suite *UtilsTestSuite) TearDownSuite() {
 			CreatedOn:   time.Now().UTC().String(),
 			UpdatedOn:   time.Now().UTC().String(),
 		},
-	}
+	})
 }
 
 func TestUtilsSuite(t *testing.T) {
@@ -75,21 +77,21 @@ func TestUtilsSuite(t *testing.T) {
 }
 
 func (suite *UtilsTestSuite) TestNextProductId() {
-	assert.Equal(suite.T(), 4, getNextProductId())
+	assert.Equal(suite.T(), 4, suite.products.GetNextProductId())
 }
 
 func (suite *UtilsTestSuite) TestGetProductIndexById() {
-	assert.Equal(suite.T(), 0, GetProductIndexById(0))
-	assert.Equal(suite.T(), 1, GetProductIndexById(3))
+	assert.Equal(suite.T(), 0, suite.products.GetProductIndexById(0))
+	assert.Equal(suite.T(), 1, suite.products.GetProductIndexById(3))
 }
 
 func (suite *UtilsTestSuite) TestFailGetProductIndexById() {
-	assert.Equal(suite.T(), -1, GetProductIndexById(1))
+	assert.Equal(suite.T(), -1, suite.products.GetProductIndexById(1))
 }
 
 func (suite *UtilsTestSuite) TestToJson() {
 	var strBuffer bytes.Buffer
-	(*productsList)[0].(*Product).ToJson(&strBuffer)
+	(*suite.products.GetProductsList())[0].(*Product).ToJson(&strBuffer)
 	assert.Equal(suite.T(), `{"id":0,"name":"Espresso","descripton":"Lite coffe drink...","price":1.49,"sku":"5faf1ada-5d01-4831-aa0c-8f93eec9d86e"}`+"\n", strBuffer.String())
 }
 

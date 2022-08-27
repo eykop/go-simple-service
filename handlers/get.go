@@ -18,7 +18,8 @@ import (
 // @Router      /products/ [get]
 func (p *Products) ListProducts(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("Content-Type", "application/json")
-	err := data.GetProductsList().ToJson(rw)
+
+	err := data.ProductsInstance().ToJson(rw)
 	if err != nil {
 		p.l.Error("Failed to List products", zap.Error(err))
 		http.Error(rw, "Failed to list products", http.StatusInternalServerError)
@@ -42,7 +43,7 @@ func (p *Products) GetProduct(rw http.ResponseWriter, r *http.Request) {
 
 	prodIndex := r.Context().Value(ValidatedProductIndexKey{}).(int)
 	rw.Header().Add("Content-Type", "application/json")
-	prodErr := data.GetProductByIndex(prodIndex).ToJson(rw)
+	prodErr := data.ProductsInstance().GetProductByIndex(prodIndex).ToJson(rw)
 	if prodErr != nil {
 		p.l.Error("Failed to encode product.", zap.Error(prodErr))
 		http.Error(rw, "Failed to encode product.", http.StatusInternalServerError)

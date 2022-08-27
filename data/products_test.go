@@ -14,16 +14,18 @@ type ProductTestSuite struct {
 	suite.Suite
 	logger             *zap.Logger
 	initialProductSize int
+	products           *Products
 }
 
 func (suite *ProductTestSuite) SetupSuite() {
 	suite.logger, _ = zap.NewDevelopment()
+	suite.products = &Products{logger: suite.logger}
 
 }
 
 func (suite *ProductTestSuite) SetupTest() {
 
-	productsList = &Products{
+	suite.products.SetProducts(&ProductsList{
 		&Product{
 			ID:          0,
 			Name:        "Espresso",
@@ -51,8 +53,8 @@ func (suite *ProductTestSuite) SetupTest() {
 			CreatedOn:   time.Now().UTC().String(),
 			UpdatedOn:   time.Now().UTC().String(),
 		},
-	}
-	suite.initialProductSize = len(*GetProductsList())
+	})
+	suite.initialProductSize = suite.products.Count()
 	assert.Equal(suite.T(), 3, suite.initialProductSize)
 
 }
@@ -62,7 +64,7 @@ func (suite *ProductTestSuite) TearDownTest() {
 
 func (suite *ProductTestSuite) TearDownSuite() {
 	defer suite.logger.Sync()
-	productsList = &Products{
+	suite.products.SetProducts(&ProductsList{
 		&Product{
 			ID:          0,
 			Name:        "Espresso",
@@ -81,7 +83,7 @@ func (suite *ProductTestSuite) TearDownSuite() {
 			CreatedOn:   time.Now().UTC().String(),
 			UpdatedOn:   time.Now().UTC().String(),
 		},
-	}
+	})
 }
 
 func TestProductSuite(t *testing.T) {
@@ -89,21 +91,21 @@ func TestProductSuite(t *testing.T) {
 }
 
 func (suite *ProductTestSuite) TestGetProductList() {
-	assert.Equal(suite.T(), suite.initialProductSize, ProductsCount())
+	assert.Equal(suite.T(), suite.initialProductSize, suite.products.Count())
 }
 
 func (suite *ProductTestSuite) TestAddPorduct() {
 	prod := &Product{Name: "No 7", Price: 7}
-	AddPorduct(prod)
-	assert.Equal(suite.T(), suite.initialProductSize+1, ProductsCount())
+	suite.products.AddPorduct(prod)
+	assert.Equal(suite.T(), suite.initialProductSize+1, suite.products.Count())
 }
 
 func (suite *ProductTestSuite) TestUpdateProductAllFields() {
 	prod := &Product{Name: "No 7", Price: 7, Description: "New Desciption", SKU: "sss-sss-sss"}
-	err := UpdateProduct(prod, 0)
+	err := suite.products.UpdateProduct(prod, 0)
 	assert.NoError(suite.T(), err)
 
-	upProd := (*GetProductsList())[0].(*Product)
+	upProd := (*suite.products.GetProductsList())[0].(*Product)
 
 	//check the product return by update
 	assert.Equal(suite.T(), prod.Name, upProd.Name)
@@ -116,20 +118,20 @@ func (suite *ProductTestSuite) TestUpdateProductAllFields() {
 
 func (suite *ProductTestSuite) TestGetProductByIndexOutOfRange() {
 	//index is larger than list items...
-	assert.Nil(suite.T(), GetProductByIndex(ProductsCount()))
+	assert.Nil(suite.T(), suite.products.GetProductByIndex(suite.products.Count()))
 
 	//index is less than zero
-	assert.Nil(suite.T(), GetProductByIndex(-1))
+	assert.Nil(suite.T(), suite.products.GetProductByIndex(-1))
 }
 
 func (suite *ProductTestSuite) TestUpdateProductPartialFields() {
 	prod := &Product{Name: "No 7", SKU: "sss-sss-sss"}
-	orgProdPrice := GetProductByIndex(0).(*Product).Price
-	orgProdDesc := GetProductByIndex(0).(*Product).Description
-	err := UpdateProduct(prod, 0)
+	orgProdPrice := suite.products.GetProductByIndex(0).(*Product).Price
+	orgProdDesc := suite.products.GetProductByIndex(0).(*Product).Description
+	err := suite.products.UpdateProduct(prod, 0)
 	assert.NoError(suite.T(), err)
 
-	upProd := GetProductByIndex(0).(*Product)
+	upProd := suite.products.GetProductByIndex(0).(*Product)
 
 	//check the product return by update
 	assert.Equal(suite.T(), prod.Name, upProd.Name)
@@ -144,39 +146,42 @@ func (suite *ProductTestSuite) TestUpdateProductPartialFields() {
 func (suite *ProductTestSuite) TestUpdateProductBadIndex() {
 	prod := &Product{Name: "No 7", SKU: "sss-sss-sss"}
 	notFoundIndex := 7
-	err := UpdateProduct(prod, notFoundIndex)
+	err := suite.products.UpdateProduct(prod, notFoundIndex)
 	assert.Error(suite.T(), err)
 }
 
 func (suite *ProductTestSuite) TestDeleteProduct() {
-	assert.NoError(suite.T(), DeleteProduct(0))
-	assert.Equal(suite.T(), suite.initialProductSize-1, ProductsCount())
-	assert.Equal(suite.T(), 2, GetProductByIndex(0).(*Product).ID)
+	assert.NoError(suite.T(), suite.products.DeleteProduct(0))
+	assert.Equal(suite.T(), suite.initialProductSize-1, suite.products.Count())
+	assert.Equal(suite.T(), 2, suite.products.GetProductByIndex(0).(*Product).ID)
 }
 
 func (suite *ProductTestSuite) TestDeleteLastProduct() {
-	assert.NoError(suite.T(), DeleteProduct(ProductsCount()-1))
-	assert.Equal(suite.T(), suite.initialProductSize-1, ProductsCount())
-	assert.Equal(suite.T(), 0, GetProductByIndex(0).(*Product).ID)
+	assert.NoError(suite.T(), suite.products.DeleteProduct(suite.products.Count()-1))
+	assert.Equal(suite.T(), suite.initialProductSize-1, suite.products.Count())
+	assert.Equal(suite.T(), 0, suite.products.GetProductByIndex(0).(*Product).ID)
 }
 
 func (suite *ProductTestSuite) TestDeleteMiddleProduct() {
-	assert.NoError(suite.T(), DeleteProduct(ProductsCount()/2))
-	assert.Equal(suite.T(), suite.initialProductSize-1, ProductsCount())
-	assert.Equal(suite.T(), 0, GetProductByIndex(0).(*Product).ID)
-	assert.Equal(suite.T(), 3, GetProductByIndex(len(*GetProductsList())-1).(*Product).ID)
+	assert.NoError(suite.T(), suite.products.DeleteProduct(suite.products.Count()/2))
+	assert.Equal(suite.T(), suite.initialProductSize-1, suite.products.Count())
+	assert.Equal(suite.T(), 0, suite.products.GetProductByIndex(0).(*Product).ID)
+	assert.Equal(suite.T(), 3, suite.products.GetProductByIndex(len(*suite.products.GetProductsList())-1).(*Product).ID)
 }
 
 func (suite *ProductTestSuite) TestDeleteProductBadIndex() {
-	assert.Error(suite.T(), DeleteProduct(5))
+	assert.Error(suite.T(), suite.products.DeleteProduct(5))
 }
 
 func (suite *ProductTestSuite) TestNextProductsList() {
-	productsList = &Products{}
-	assert.Equal(suite.T(), 0, getNextProductId())
+
+	for suite.products.Count() > 0 {
+		suite.products.DeleteProduct(0)
+	}
+	assert.Equal(suite.T(), 0, suite.products.GetNextProductId())
 }
 
 func (suite *ProductTestSuite) TestProductsToJson() {
 	strBuffer := bytes.Buffer{}
-	assert.NoError(suite.T(), GetProductsList().ToJson(&strBuffer))
+	assert.NoError(suite.T(), suite.products.ToJson(&strBuffer))
 }

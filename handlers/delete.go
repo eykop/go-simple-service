@@ -19,6 +19,6 @@ import (
 // @Router       /products/{id} [delete]
 func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
 	prodIndex := r.Context().Value(ValidatedProductIndexKey{}).(int)
-	data.DeleteProduct(prodIndex)
+	data.ProductsInstance().DeleteProduct(prodIndex)
 	rw.WriteHeader(http.StatusNoContent)
 }

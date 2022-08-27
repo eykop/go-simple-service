@@ -3,7 +3,8 @@ package data
 import (
 	"fmt"
 	"io"
-	"time"
+
+	"go.uber.org/zap"
 )
 
 type ProductInterface interface {
@@ -15,65 +16,91 @@ type ProductInterface interface {
 	Validate() error
 }
 
-type Products []ProductInterface
+type ProductsList []ProductInterface
 
-func ProductsCount() int {
-	return len(*productsList)
+type ProductsInterface interface {
+	Count() int
+	GetProductByIndex(index int) ProductInterface
+	GetProductsList() *ProductsList
+	AddPorduct(p ProductInterface)
+	UpdateProduct(incommingProd ProductInterface, index int) error
+	DeleteProduct(index int) error
+	GetProductIndexById(id int) int
+	GetNextProductId() int
+	ToJson(w io.Writer) error
 }
 
-func GetProductByIndex(index int) ProductInterface {
-	if index < 0 || index > len(*productsList)-1 {
-		//fmt.Errorf("update error, product index %d out of range", index)
+type Products struct {
+	productsList *ProductsList
+	logger       *zap.Logger
+}
+
+func NewProducts() ProductsInterface {
+	return &Products{logger: &zap.Logger{}, productsList: &ProductsList{}}
+}
+
+func (products *Products) SetProducts(pl *ProductsList) {
+
+	products.productsList = pl
+}
+
+func (products *Products) GetProductsList() *ProductsList {
+	return products.productsList
+}
+
+func (products *Products) Count() int {
+	return len(*products.productsList)
+}
+
+func (products *Products) GetProductByIndex(index int) ProductInterface {
+	if index < 0 || index > products.Count()-1 {
+		products.logger.Error("update error, product index out of range", zap.Int("index", index))
 		return nil
 	}
-	return (*productsList)[index]
-
-}
-func GetProductsList() *Products {
-	return productsList
+	return (*products.productsList)[index]
 }
 
-func AddPorduct(p ProductInterface) {
-	p.SetID(getNextProductId())
-	*productsList = append(*productsList, p)
+func (products *Products) AddPorduct(p ProductInterface) {
+	p.SetID(products.GetNextProductId())
+	*products.productsList = append((*products.productsList), p)
 }
 
-func UpdateProduct(incommingProd ProductInterface, index int) error {
+func (products *Products) UpdateProduct(incommingProd ProductInterface, index int) error {
 	//add logger
-	if index < 0 || index > len(*productsList)-1 {
+	if index < 0 || index > products.Count()-1 {
 
 		return fmt.Errorf("update error, product index %d out of range", index)
 	}
-	p := (*productsList)[index]
+	p := (*products.productsList)[index]
 	p.UpdateProduct(incommingProd)
 	return nil
 }
 
-func DeleteProduct(index int) error {
+func (products *Products) DeleteProduct(index int) error {
 	// todo add logger l.Info("Delete Procut", zap.Int("id", productId))
 
-	if index < 0 || index > len(*productsList)-1 {
+	if index < 0 || index > products.Count()-1 {
 		return fmt.Errorf("deletion error, product index %d out of range", index)
 	}
-	if index == len(*productsList)-1 {
-		*productsList = (*productsList)[:index]
+	if index == products.Count()-1 {
+		*products.productsList = (*products.productsList)[:index]
 	} else {
-		*productsList = append((*productsList)[:index], (*productsList)[index+1:]...)
+		*products.productsList = append((*products.productsList)[:index], (*products.productsList)[index+1:]...)
 	}
 	return nil
 
 }
 
-func getNextProductId() int {
-	if len(*productsList) == 0 {
+func (products *Products) GetNextProductId() int {
+	if products.Count() == 0 {
 		return 0
 	}
-	lastProduct := (*productsList)[len(*productsList)-1]
+	lastProduct := (*products.productsList)[products.Count()-1]
 	return lastProduct.GetID() + 1
 }
 
-func GetProductIndexById(id int) int {
-	for index, product := range *productsList {
+func (products *Products) GetProductIndexById(id int) int {
+	for index, product := range *products.productsList {
 		if product.GetID() == id {
 			return index
 		}
@@ -82,27 +109,16 @@ func GetProductIndexById(id int) int {
 	return -1
 }
 
-func (pl *Products) ToJson(w io.Writer) error {
-	return toJson(pl, w)
+func (products *Products) ToJson(w io.Writer) error {
+	return toJson(products.productsList, w)
 }
 
-var productsList = &Products{
-	&Product{
-		ID:          0,
-		Name:        "Espresso",
-		Description: "Lite coffe drink...",
-		Price:       1.49,
-		SKU:         "5faf1ada-5d01-4831-aa0c-8f93eec9d86e",
-		CreatedOn:   time.Now().UTC().String(),
-		UpdatedOn:   time.Now().UTC().String(),
-	},
-	&Product{
-		ID:          1,
-		Name:        "Latte",
-		Description: "Lite coffe drink with milk...",
-		Price:       2.49,
-		SKU:         "a345d9d6-0c08-45a2-887a-4c22594737b3",
-		CreatedOn:   time.Now().UTC().String(),
-		UpdatedOn:   time.Now().UTC().String(),
-	},
+var productsInstance = NewProducts()
+
+func ProductsInstance() ProductsInterface {
+	return productsInstance
+}
+
+func InitProducts(products ProductsInterface) {
+	productsInstance = products
 }

@@ -24,13 +24,13 @@ func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 
 	incommingProd := r.Context().Value(ProductKey{}).(data.ProductInterface)
 	prodIndex := r.Context().Value(ValidatedProductIndexKey{}).(int)
-	err := data.UpdateProduct(incommingProd, prodIndex)
+	err := data.ProductsInstance().UpdateProduct(incommingProd, prodIndex)
 	if err != nil {
 		p.l.Error("Failed to update product.", zap.Error(err))
 		http.Error(rw, "Failed to update product.", http.StatusBadRequest)
 	}
 
-	updatedProd := data.GetProductByIndex(prodIndex)
+	updatedProd := data.ProductsInstance().GetProductByIndex(prodIndex)
 	rw.Header().Add("Content-Type", "application/json")
 	updatedProd.ToJson(rw)
 	p.l.Info("Update Products Response: ", zap.String("remoteAddr", r.RemoteAddr), zap.String("method", r.Method), zap.String("url", r.URL.Path), zap.Int("status", http.StatusOK))

@@ -28,7 +28,7 @@ func DecodeProductMiddleware(l *zap.Logger) func(http.Handler) http.Handler {
 					return
 				}
 
-				l.Debug("decoded product info", zap.String("name", prod.GetName()))
+				l.Debug("decoded product info", zap.Int("name", prod.GetID()))
 				// add the product to the context
 				ctx := context.WithValue(r.Context(), handlers.ProductKey{}, prod)
 				r = r.WithContext(ctx)
