@@ -1,4 +1,5 @@
 # go-simple-service
+![Coverage](https://img.shields.io/badge/Coverage-85.1%25-brightgreen)
 
 A simple microservice with Golang, Mainly done while learning Golang
 
