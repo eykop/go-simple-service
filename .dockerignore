@@ -1,0 +1,10 @@
+**
+!app
+!data
+!docs
+!handlers
+!middlewares
+!go.mod
+!go.sum
+!main.go
+!docker-entrypoint.sh
