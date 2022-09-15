@@ -1,0 +1,8 @@
+version: "3.8"
+services:
+  go-simple-ms:
+    container_name: go-simple-ms
+    build: ../
+    command: "/home/app/web/webApp"
+    ports:
+      - "3000:3000"

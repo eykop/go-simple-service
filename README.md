@@ -12,7 +12,7 @@ A simple microservice with Golang, Mainly done while learning Golang
 # TODO - Order is not pririty:
 
 - [ ] Connect to DB (PostgreSQL).
-- [ ] Dockerfile and Docker compose.
+- [x] Dockerfile and Docker compose.
 - [x] Better setup repository and improve documenation.
 - [ ] Add more unit tests.
   - [x] utils
@@ -24,6 +24,22 @@ A simple microservice with Golang, Mainly done while learning Golang
 - [ ] Add some authentication (proably some JWT).
 - [ ] Add some permissions for calling APIs.
 - [x] Refactor code and make more order.
+
+# Docker & Docker Compose:
+
+Assuming you have docker and docker compse already installed on your machine:
+
+To build a Docker image run the following command:
+
+`sudo docker build . -t go-simple-ms:latest`
+
+To run a docker container of the docker image we have built with above command:
+
+`sudo docker run --rm -p 3000:3000 go-simple-ms:latest /home/app/web/webApp`
+
+To build and run docker container with docker compose:
+
+`sudo docker-compose up --build`
 
 # Swagger
 
